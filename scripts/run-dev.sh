@@ -1,5 +1,5 @@
 #!/bin/bash
-# Helper to scaffold a development environment in a Docker container
+# Helper to scaffold or enter a development environment in a Docker container
 set -e
 
 # Check for argument
@@ -20,25 +20,30 @@ TMUX_RESURRECT_DIR="$HOME/denv/tmux"
 mkdir -p "$(dirname "$HISTFILE")"
 touch "$HISTFILE"
 
-echo "Docker development environment started with:"
-echo "Using image: $IMAGE_NAME"
-echo "Using workspace: $WORKSPACE"
-echo "Using history file: $HISTFILE"
-echo "Using gitconfig: $GITCONFIG"
-echo "Using SSH dir (read-only): $SSH_DIR"
+echo "denv configs:"
+echo "- image: $IMAGE_NAME"
+echo "- workspace: $WORKSPACE"
+echo "- history file: $HISTFILE"
+echo "- gitconfig: $GITCONFIG"
+echo "- SSH dir (read-only): $SSH_DIR"
 
-# Run Docker container
-  # --restart=unless-stopped \
-docker run -it \
-  --rm \
-  --name denv \
-  --network=host \
-  --privileged \
-  -v "$WORKSPACE":/workspace \
-  -v "$HISTFILE":/root/.zsh/history \
-  -v "$GITCONFIG":/root/.gitconfig:ro \
-  -v "$SSH_DIR":/root/.ssh:ro \
-  -v "$TMUX_RESURRECT_DIR:/root/.tmux/resurrect" \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  "$IMAGE_NAME" \
-  zsh
+# Check if container is already running
+if docker ps --format '{{.Names}}' | grep -q "^denv$"; then
+  echo "Container 'denv' is already running. Attaching..."
+  docker exec -it denv zsh
+else
+  echo "Starting new Docker development environment..."
+  docker run -it \
+    --rm \
+    --name denv \
+    --network=host \
+    --privileged \
+    -v "$WORKSPACE":/workspace \
+    -v "$HISTFILE":/root/.zsh/history \
+    -v "$GITCONFIG":/root/.gitconfig:ro \
+    -v "$SSH_DIR":/root/.ssh:ro \
+    -v "$TMUX_RESURRECT_DIR/:/root/.tmux/resurrect" \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    "$IMAGE_NAME" \
+    zsh
+fi
