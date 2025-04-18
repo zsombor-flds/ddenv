@@ -4,7 +4,9 @@ set -e
 
 # Define paths
 HISTFILE="$HOME/denv/.docker_zsh_history"
-WORKSPACE="$HOME/code/"
+WORKSPACE="$HOME/workspace"
+GITCONFIG="$HOME/.gitconfig"
+SSH_DIR="$HOME/.ssh"
 
 # Create parent dir for history file
 mkdir -p "$(dirname "$HISTFILE")"
@@ -13,11 +15,15 @@ touch "$HISTFILE"
 echo "Docker development environment started with:"
 echo "Using workspace: $WORKSPACE"
 echo "Using history file: $HISTFILE"
+echo "Using gitconfig: $GITCONFIG"
+echo "Using SSH dir: $SSH_DIR"
 
 # Run Docker container
 docker run -it \
   -v "$WORKSPACE":/workspace \
   -v "$HISTFILE":/root/.zsh/history \
+  -v "$GITCONFIG":/root/.gitconfig:ro \
+  -v "$SSH_DIR":/root/.ssh:ro \
   -v /var/run/docker.sock:/var/run/docker.sock \
   --privileged \
   my-dev-env \
