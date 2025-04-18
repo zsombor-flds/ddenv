@@ -26,6 +26,7 @@ alias python='/usr/bin/python3'
 alias pip='/usr/bin/pip3'
 alias ls='exa --icons'
 alias cat='bat --style=plain'
+alias helper='glow /usr/local/bin/run-helper.sh'
 
 # Optional completions and fuzzy finder
 [[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
