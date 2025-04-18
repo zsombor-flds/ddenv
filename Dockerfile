@@ -7,8 +7,11 @@ ENV PATH="/root/.local/bin:/root/.fzf/bin:/root/.cargo/bin:$PATH"
 ENV TERM="xterm-256color"
 
 RUN apt-get update && apt-get install -y \
-    zsh git curl wget htop vim docker.io bash-completion jq yq net-tools unzip bat \
+    zsh git curl wget htop vim docker.io bash-completion jq yq net-tools unzip bat tmux make \
+    tzdata \
     && ln -s /usr/bin/batcat /usr/local/bin/bat \
+    && ln -fs /usr/share/zoneinfo/Europe/Budapest /etc/localtime \
+    && dpkg-reconfigure -f noninteractive tzdata \
     && apt-get clean
 
 # Install oh-my-zsh
