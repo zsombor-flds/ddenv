@@ -11,7 +11,7 @@ plugins=(
 source $ZSH/oh-my-zsh.sh
 
 # History config
-export HISTFILE=~/.zsh_history
+export HISTFILE=~/.zsh/history
 export HISTSIZE=1000000000
 export HISTFILESIZE=1000000000
 setopt append_history
@@ -27,6 +27,12 @@ alias pip='/usr/bin/pip3'
 alias ls='exa --icons'
 alias cat='bat --style=plain'
 alias helper='glow /usr/local/bin/run-helper.sh'
+alias gpull='git pull origin $(git rev-parse --abbrev-ref HEAD)'
+alias gpush='git push origin HEAD'
+alias gc="git clone"
+alias gs="git checkout -B"
+alias dev="find . -name 'notes.md' -exec glow {} +"
+alias activate="source .venv/bin/activate"
 
 # Optional completions and fuzzy finder
 [[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"

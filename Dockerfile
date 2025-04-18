@@ -7,7 +7,7 @@ ENV PATH="/root/.local/bin:/root/.fzf/bin:/root/.cargo/bin:$PATH"
 ENV TERM="xterm-256color"
 
 RUN apt-get update && apt-get install -y \
-    zsh git curl wget vim python3 python3-pip python3-venv docker.io bash-completion cargo \
+    zsh git curl wget vim python3 python3-pip python3-venv docker.io bash-completion cargo jq yq \
     && apt-get clean
 
 # Install oh-my-zsh
@@ -49,9 +49,9 @@ RUN mkdir -p /etc/apt/keyrings && \
 COPY ./config/.zshrc /root/.zshrc
 
 # Copy helper entrypoint
-COPY ./scripts/run-helper.sh /usr/local/bin/run-helper.sh
+COPY ./scripts/run-dev.sh /usr/local/bin/run-dev.sh
 COPY ./scripts/helper.sh /usr/local/bin/helper
-RUN chmod +x /usr/local/bin/run-helper.sh /usr/local/bin/helper
+RUN chmod +x /usr/local/bin/run-dev.sh /usr/local/bin/helper
 
 WORKDIR /workspace
 CMD ["zsh"]
