@@ -56,6 +56,21 @@ RUN unzip duckdb_cli-linux-aarch64.zip && \
     chmod +x /usr/local/bin/duckdb && \
     rm duckdb_cli-linux-aarch64.zip
 
+# Install tmux plugin manager (TPM)
+RUN git clone https://github.com/tmux-plugins/tpm /root/.tmux/plugins/tpm
+
+# Create a basic tmux.conf with resurrect and continuum
+RUN echo "\
+set -g @plugin 'tmux-plugins/tpm'\n\
+set -g @plugin 'tmux-plugins/tmux-resurrect'\n\
+set -g @plugin 'tmux-plugins/tmux-continuum'\n\
+set -g @continuum-restore 'on'\n\
+set -g @resurrect-strategy-nvim 'session'\n\
+run '~/.tmux/plugins/tpm/tpm'\n\
+" > /root/.tmux.conf
+
+RUN ~/.tmux/plugins/tpm/bin/install_plugins
+
 # Copy custom zshrc
 COPY ./config/.zshrc /root/.zshrc
 

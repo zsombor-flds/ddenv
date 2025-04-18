@@ -7,7 +7,7 @@ HISTFILE="$HOME/denv/.docker_zsh_history"
 WORKSPACE="$HOME/workspace"
 GITCONFIG="$HOME/.gitconfig"
 SSH_DIR="$HOME/.ssh"
-IMAGE_NAME="ghcr.io/zsombor-flds/denv"
+TMUX_RESURRECT_DIR="$HOME/denv/tmux"
 
 # Create parent dir for history file
 mkdir -p "$(dirname "$HISTFILE")"
@@ -30,6 +30,7 @@ docker run -it \
   -v "$HISTFILE":/root/.zsh/history \
   -v "$GITCONFIG":/root/.gitconfig:ro \
   -v "$SSH_DIR":/root/.ssh:ro \
+  -v "$TMUX_RESURRECT_DIR:/root/.tmux/resurrect" \
   -v /var/run/docker.sock:/var/run/docker.sock \
   "$IMAGE_NAME" \
   zsh
