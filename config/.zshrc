@@ -26,7 +26,7 @@ setopt HIST_IGNORE_ALL_DUPS
 # === Aliases ===
 alias python='/usr/bin/python3'
 alias pip='/usr/bin/pip3'
-alias ls='exa --no-icons'
+# alias ls='exa --no-icons'
 alias cat='bat --style=plain'
 alias helper='glow /usr/local/bin/run-helper.sh'
 alias gpull='git pull origin $(git rev-parse --abbrev-ref HEAD)'

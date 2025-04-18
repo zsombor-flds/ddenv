@@ -7,7 +7,8 @@ ENV PATH="/root/.local/bin:/root/.fzf/bin:/root/.cargo/bin:$PATH"
 ENV TERM="xterm-256color"
 
 RUN apt-get update && apt-get install -y \
-    zsh git curl wget vim python3 python3-pip python3-venv docker.io bash-completion cargo jq yq \
+    zsh git curl wget vim python3 docker.io bash-completion jq yq net-tools unzip bat \
+    && ln -s /usr/bin/batcat /usr/local/bin/bat \
     && apt-get clean
 
 # Install oh-my-zsh
@@ -23,13 +24,9 @@ RUN git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM}/plu
 RUN git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf && \
     ~/.fzf/install --key-bindings --completion --no-update-rc --no-bash --no-fish
 
-# Install bat
-RUN apt-get install -y bat && \
-    ln -s /usr/bin/batcat /usr/local/bin/bat
-
-# Install exa with locked dependencies (for older rustc compatibility)
-RUN cargo install exa --locked && \
-    ln -s /root/.cargo/bin/exa /usr/local/bin/exa
+# # Install exa with locked dependencies (for older rustc compatibility)
+# RUN cargo install exa --locked && \
+#     ln -s /root/.cargo/bin/exa /usr/local/bin/exa
 
 # Install zoxide and symlink globally
 RUN curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash && \
@@ -44,6 +41,17 @@ RUN chmod +x /uv-installer.sh && sh /uv-installer.sh && rm /uv-installer.sh
 #     curl -fsSL https://repo.charm.sh/apt/gpg.key | gpg --dearmor -o /etc/apt/keyrings/charm.gpg && \
 #     echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | tee /etc/apt/sources.list.d/charm.list && \
 #     apt update && apt install glow
+
+# Install DuckDB
+WORKDIR /opt/duckdb
+
+RUN wget https://github.com/duckdb/duckdb/releases/download/v1.2.2/duckdb_cli-linux-aarch64.zip
+
+# Unzip and move to /usr/local/bin
+RUN unzip duckdb_cli-linux-aarch64.zip && \
+    mv duckdb /usr/local/bin/duckdb && \
+    chmod +x /usr/local/bin/duckdb && \
+    rm duckdb_cli-linux-aarch64.zip
 
 # Copy custom zshrc
 COPY ./config/.zshrc /root/.zshrc

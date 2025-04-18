@@ -20,11 +20,13 @@ echo "Using SSH dir: $SSH_DIR"
 
 # Run Docker container
 docker run -it \
+  --rm \
   -v "$WORKSPACE":/workspace \
   -v "$HISTFILE":/root/.zsh/history \
   -v "$GITCONFIG":/root/.gitconfig:ro \
   -v "$SSH_DIR":/root/.ssh:ro \
   -v /var/run/docker.sock:/var/run/docker.sock \
+  --network=host \
   --privileged \
-  my-dev-env \
+  denv \
   zsh
