@@ -40,10 +40,10 @@ ADD https://astral.sh/uv/install.sh /uv-installer.sh
 RUN chmod +x /uv-installer.sh && sh /uv-installer.sh && rm /uv-installer.sh
 
 # Install Glow
-RUN mkdir -p /etc/apt/keyrings && \
-    curl -fsSL https://repo.charm.sh/apt/gpg.key | gpg --dearmor -o /etc/apt/keyrings/charm.gpg && \
-    echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | tee /etc/apt/sources.list.d/charm.list && \
-    apt update && apt install glow
+# RUN mkdir -p /etc/apt/keyrings && \
+#     curl -fsSL https://repo.charm.sh/apt/gpg.key | gpg --dearmor -o /etc/apt/keyrings/charm.gpg && \
+#     echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | tee /etc/apt/sources.list.d/charm.list && \
+#     apt update && apt install glow
 
 # Copy custom zshrc
 COPY ./config/.zshrc /root/.zshrc
