@@ -7,7 +7,7 @@ ENV PATH="/root/.local/bin:/root/.fzf/bin:/root/.cargo/bin:$PATH"
 ENV TERM="xterm-256color"
 
 RUN apt-get update && apt-get install -y \
-    zsh git curl wget vim python3 docker.io bash-completion jq yq net-tools unzip bat \
+    zsh git curl wget htop vim docker.io bash-completion jq yq net-tools unzip bat \
     && ln -s /usr/bin/batcat /usr/local/bin/bat \
     && apt-get clean
 

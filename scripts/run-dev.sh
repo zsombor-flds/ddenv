@@ -21,6 +21,7 @@ echo "Using SSH dir: $SSH_DIR"
 # Run Docker container
 docker run -it \
   --rm \
+  --name denv \
   -v "$WORKSPACE":/workspace \
   -v "$HISTFILE":/root/.zsh/history \
   -v "$GITCONFIG":/root/.gitconfig:ro \
@@ -28,5 +29,5 @@ docker run -it \
   -v /var/run/docker.sock:/var/run/docker.sock \
   --network=host \
   --privileged \
-  denv \
+  ghcr.io/zsombor-flds/denv \
   zsh
