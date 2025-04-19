@@ -38,6 +38,9 @@ else
     --name denv \
     --network=host \
     --privileged \
+    --log-driver=json-file \
+    --log-opt max-size=10m \
+    --log-opt max-file=3 \
     -v "$WORKSPACE":/workspace \
     -v "$HISTFILE":/root/.zsh/history \
     -v "$GITCONFIG":/root/.gitconfig:ro \
