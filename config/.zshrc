@@ -44,3 +44,10 @@ export PATH="$HOME/.fzf/bin:$PATH"
 
 # === zoxide ===
 eval "$(zoxide init zsh)"
+
+# === Tmux ===
+if command -v tmux &> /dev/null && [ -z "$TMUX" ]; then
+  exec tmux
+fi
+
+PROMPT='[denv] %1~ $(git_prompt_info)'

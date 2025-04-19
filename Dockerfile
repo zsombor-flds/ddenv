@@ -61,10 +61,20 @@ RUN git clone https://github.com/tmux-plugins/tpm /root/.tmux/plugins/tpm
 
 # Create a basic tmux.conf with resurrect and continuum
 RUN echo "\
+set -g mouse on\n\
+setw -g mode-keys vi\n\
+bind -T copy-mode-vi WheelUpPane send-keys -X scroll-up\n\
+bind -T copy-mode-vi WheelDownPane send-keys -X scroll-down\n\
+bind -T copy-mode-vi PageUp send-keys -X page-up\n\
+bind -T copy-mode-vi PageDown send-keys -X page-down\n\
+bind -n WheelUpPane if-shell -F -t = \"#{mouse_any_flag}\" \"copy-mode -e\"\n\
+unbind -T root MouseDragEnd1Pane\n\
+\n\
 set -g @plugin 'tmux-plugins/tpm'\n\
 set -g @plugin 'tmux-plugins/tmux-resurrect'\n\
 set -g @plugin 'tmux-plugins/tmux-continuum'\n\
 set -g @continuum-restore 'on'\n\
+set -g @continuum-save-interval '1'\n\
 set -g @resurrect-strategy-nvim 'session'\n\
 run '~/.tmux/plugins/tpm/tpm'\n\
 " > /root/.tmux.conf
