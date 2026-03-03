@@ -85,9 +85,9 @@ RUN ~/.tmux/plugins/tpm/bin/install_plugins
 COPY ./config/.zshrc /root/.zshrc
 
 # Copy helper entrypoint
-COPY ./scripts/run-dev.sh /usr/local/bin/run-dev.sh
+COPY ./scripts/ddenv /usr/local/bin/ddenv
 COPY ./scripts/helper.sh /usr/local/bin/helper
-RUN chmod +x /usr/local/bin/run-dev.sh /usr/local/bin/helper
+RUN chmod +x /usr/local/bin/ddenv /usr/local/bin/helper
 
 WORKDIR /workspace
 CMD ["zsh"]
