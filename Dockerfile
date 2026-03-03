@@ -8,7 +8,7 @@ ENV TERM="xterm-256color"
 
 RUN apt-get update && apt-get install -y \
     zsh git curl wget htop vim docker.io bash-completion jq yq net-tools unzip bat tmux make \
-    tzdata \
+    tzdata neofetch nodejs npm \
     && ln -s /usr/bin/batcat /usr/local/bin/bat \
     && ln -fs /usr/share/zoneinfo/Europe/Budapest /etc/localtime \
     && dpkg-reconfigure -f noninteractive tzdata \
@@ -55,6 +55,16 @@ RUN unzip duckdb_cli-linux-aarch64.zip && \
     mv duckdb /usr/local/bin/duckdb && \
     chmod +x /usr/local/bin/duckdb && \
     rm duckdb_cli-linux-aarch64.zip
+
+# Install Claude Code
+RUN npm install -g @anthropic-ai/claude-code
+
+# Install lazydocker
+RUN curl https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh | bash
+
+# Install k9s
+ARG TARGETARCH
+RUN curl -fsSL "https://github.com/derailed/k9s/releases/latest/download/k9s_Linux_${TARGETARCH}.tar.gz" | tar xz -C /usr/local/bin k9s
 
 # Install tmux plugin manager (TPM)
 RUN git clone https://github.com/tmux-plugins/tpm /root/.tmux/plugins/tpm
