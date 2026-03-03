@@ -3,7 +3,7 @@ Dockerized development environment — consistent dev setup across any VM.
 
 ## Install
 ```bash
-curl -fsSL https://raw.githubusercontent.com/zsombor-flds/denv/main/scripts/ddenv \
+curl -fsSL https://raw.githubusercontent.com/zsombor-flds/ddenv/main/scripts/ddenv \
   | sudo tee /usr/local/bin/ddenv > /dev/null && sudo chmod +x /usr/local/bin/ddenv
 ```
 

@@ -16,7 +16,7 @@ usage() {
   echo "  status    Show container status"
   echo ""
   echo "Install:"
-  echo "  curl -fsSL https://raw.githubusercontent.com/zsombor-flds/denv/main/scripts/ddenv \\"
+  echo "  curl -fsSL https://raw.githubusercontent.com/zsombor-flds/ddenv/main/scripts/ddenv \\"
   echo "    | sudo tee /usr/local/bin/ddenv > /dev/null && sudo chmod +x /usr/local/bin/ddenv"
 }
 
