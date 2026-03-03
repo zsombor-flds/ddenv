@@ -1,5 +1,5 @@
 #!/bin/bash
-# ddenv — start or attach to a Dockerized development environment
+# denv — start or attach to a Dockerized development environment
 set -e
 
 IMAGE_REMOTE="ghcr.io/zsombor-flds/denv"
@@ -7,7 +7,7 @@ IMAGE_LOCAL="denv"
 CONTAINER_NAME="denv"
 
 usage() {
-  echo "Usage: ddenv [command]"
+  echo "Usage: denv [command]"
   echo ""
   echo "Commands:"
   echo "  (none)    Start or attach to the dev environment (remote image)"
@@ -16,8 +16,8 @@ usage() {
   echo "  status    Show container status"
   echo ""
   echo "Install:"
-  echo "  curl -fsSL https://raw.githubusercontent.com/zsombor-flds/ddenv/main/scripts/ddenv \\"
-  echo "    | sudo tee /usr/local/bin/ddenv > /dev/null && sudo chmod +x /usr/local/bin/ddenv"
+  echo "  curl -fsSL https://raw.githubusercontent.com/zsombor-flds/denv/main/scripts/denv \\"
+  echo "    | sudo tee /usr/local/bin/denv > /dev/null && sudo chmod +x /usr/local/bin/denv"
 }
 
 check_docker() {
@@ -49,7 +49,7 @@ start_or_attach() {
     echo "Container '${CONTAINER_NAME}' is already running. Attaching..."
     docker exec -it "$CONTAINER_NAME" zsh
   else
-    echo "Starting ddenv (image: $image)..."
+    echo "Starting denv (image: $image)..."
     docker run -it \
       --rm \
       --name "$CONTAINER_NAME" \
