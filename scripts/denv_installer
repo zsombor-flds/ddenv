@@ -1,0 +1,196 @@
+#!/bin/bash
+# denv — start or attach to a Dockerized development environment
+#
+# Install:
+#   curl -fsSL https://raw.githubusercontent.com/zsombor-flds/denv/main/scripts/denv_installer -o denv_installer
+#   chmod +x denv_installer
+#   ./denv_installer install
+#
+# Uninstall:
+#   denv uninstall
+set -e
+
+IMAGE_REMOTE="ghcr.io/zsombor-flds/denv"
+IMAGE_LOCAL="denv"
+CONTAINER_NAME="denv"
+INSTALL_DIR="/usr/local/bin"
+INSTALL_PATH="${INSTALL_DIR}/denv"
+
+# Persistent state dirs
+DENV_CONF="$HOME/denv"
+HISTFILE_PATH="$DENV_CONF/.docker_zsh_history"
+WORKSPACE="$HOME/workspace"
+GITCONFIG="$HOME/.gitconfig"
+SSH_DIR="$HOME/.ssh"
+TMUX_DIR="$DENV_CONF/tmux"
+
+usage() {
+  echo "Usage: denv [command]"
+  echo ""
+  echo "Commands:"
+  echo "  (none)    Start or attach to the dev environment (remote image)"
+  echo "  local     Start or attach using a locally-built image"
+  echo "  stop      Stop the running container"
+  echo "  status    Show container status"
+  echo ""
+  echo "  install   Install denv to ${INSTALL_DIR}"
+  echo "  uninstall Remove denv from ${INSTALL_DIR}"
+}
+
+check_docker() {
+  if ! command -v docker &> /dev/null; then
+    echo "Error: docker is not installed." >&2
+    echo "Install it first: https://docs.docker.com/engine/install/" >&2
+    exit 1
+  fi
+}
+
+need_sudo_for_install() {
+  ! [ -w "$INSTALL_DIR" ]
+}
+
+need_sudo_for_docker() {
+  # If user can't access the docker socket, use sudo
+  if [ -S /var/run/docker.sock ] && ! [ -w /var/run/docker.sock ]; then
+    return 0
+  fi
+  # Also check if docker commands work without sudo
+  if ! docker info &> /dev/null; then
+    return 0
+  fi
+  return 1
+}
+
+DOCKER_CMD="docker"
+
+setup_docker_cmd() {
+  if need_sudo_for_docker; then
+    DOCKER_CMD="sudo docker"
+  fi
+}
+
+run_install_privileged() {
+  if need_sudo_for_install; then
+    sudo "$@"
+  else
+    "$@"
+  fi
+}
+
+do_install() {
+  local self
+  self="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
+
+  echo "Installing denv to ${INSTALL_PATH}..."
+  run_install_privileged mkdir -p "$INSTALL_DIR"
+  run_install_privileged cp "$self" "$INSTALL_PATH"
+  run_install_privileged chmod +x "$INSTALL_PATH"
+
+  # Add to PATH if not already there
+  if ! echo "$PATH" | tr ':' '\n' | grep -qx "$INSTALL_DIR"; then
+    local shell_rc=""
+    case "$(basename "$SHELL")" in
+      zsh)  shell_rc="$HOME/.zshrc" ;;
+      bash) shell_rc="$HOME/.bashrc" ;;
+      *)    shell_rc="$HOME/.profile" ;;
+    esac
+    echo "export PATH=\"${INSTALL_DIR}:\$PATH\"" >> "$shell_rc"
+    echo "Added ${INSTALL_DIR} to PATH in ${shell_rc}"
+    echo "Run 'source ${shell_rc}' or restart your shell to use denv."
+  fi
+
+  echo "denv installed to ${INSTALL_PATH}"
+}
+
+do_uninstall() {
+  if [ ! -f "$INSTALL_PATH" ]; then
+    echo "denv is not installed at ${INSTALL_PATH}."
+    exit 1
+  fi
+
+  echo "Removing denv from ${INSTALL_PATH}..."
+  run_install_privileged rm -f "$INSTALL_PATH"
+  echo "denv uninstalled."
+}
+
+container_running() {
+  $DOCKER_CMD ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"
+}
+
+start_or_attach() {
+  local image="$1"
+
+  mkdir -p "$(dirname "$HISTFILE_PATH")" "$TMUX_DIR" "$WORKSPACE"
+  touch "$HISTFILE_PATH"
+
+  if container_running; then
+    echo "Container '${CONTAINER_NAME}' is already running. Attaching..."
+    $DOCKER_CMD exec -it "$CONTAINER_NAME" zsh
+  else
+    echo "Starting denv (image: $image)..."
+    $DOCKER_CMD run -it \
+      --rm \
+      --name "$CONTAINER_NAME" \
+      --network=host \
+      --privileged \
+      --log-driver=json-file \
+      --log-opt max-size=10m \
+      --log-opt max-file=3 \
+      -v "$WORKSPACE":/workspace \
+      -v "$HISTFILE_PATH":/root/.zsh/history \
+      -v "$GITCONFIG":/root/.gitconfig:ro \
+      -v "$SSH_DIR":/root/.ssh:ro \
+      -v "$TMUX_DIR":/root/.tmux/resurrect \
+      -v /var/run/docker.sock:/var/run/docker.sock \
+      "$image" \
+      zsh
+  fi
+}
+
+# --- Main ---
+
+case "${1:-}" in
+  ""|start)
+    check_docker
+    setup_docker_cmd
+    start_or_attach "$IMAGE_REMOTE"
+    ;;
+  local)
+    check_docker
+    setup_docker_cmd
+    start_or_attach "$IMAGE_LOCAL"
+    ;;
+  stop)
+    check_docker
+    setup_docker_cmd
+    if container_running; then
+      $DOCKER_CMD stop "$CONTAINER_NAME"
+      echo "Stopped."
+    else
+      echo "No running container."
+    fi
+    ;;
+  status)
+    check_docker
+    setup_docker_cmd
+    if container_running; then
+      $DOCKER_CMD ps --filter "name=^${CONTAINER_NAME}$"
+    else
+      echo "Not running."
+    fi
+    ;;
+  install)
+    do_install
+    ;;
+  uninstall)
+    do_uninstall
+    ;;
+  -h|--help|help)
+    usage
+    ;;
+  *)
+    echo "Unknown command: $1" >&2
+    usage >&2
+    exit 1
+    ;;
+esac
