@@ -46,15 +46,15 @@ RUN chmod +x /uv-installer.sh && sh /uv-installer.sh && rm /uv-installer.sh
 #     apt update && apt install glow
 
 # Install DuckDB
+ARG TARGETARCH
 WORKDIR /opt/duckdb
 
-RUN wget https://github.com/duckdb/duckdb/releases/download/v1.2.2/duckdb_cli-linux-aarch64.zip
-
-# Unzip and move to /usr/local/bin
-RUN unzip duckdb_cli-linux-aarch64.zip && \
+RUN DUCKDB_ARCH=$([ "$TARGETARCH" = "arm64" ] && echo "aarch64" || echo "$TARGETARCH") && \
+    wget https://github.com/duckdb/duckdb/releases/download/v1.2.2/duckdb_cli-linux-${DUCKDB_ARCH}.zip && \
+    unzip duckdb_cli-linux-${DUCKDB_ARCH}.zip && \
     mv duckdb /usr/local/bin/duckdb && \
     chmod +x /usr/local/bin/duckdb && \
-    rm duckdb_cli-linux-aarch64.zip
+    rm duckdb_cli-linux-${DUCKDB_ARCH}.zip
 
 # Install Claude Code
 RUN npm install -g @anthropic-ai/claude-code
@@ -63,7 +63,6 @@ RUN npm install -g @anthropic-ai/claude-code
 RUN curl https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh | bash
 
 # Install k9s
-ARG TARGETARCH
 RUN curl -fsSL "https://github.com/derailed/k9s/releases/latest/download/k9s_Linux_${TARGETARCH}.tar.gz" | tar xz -C /usr/local/bin k9s
 
 # Install tmux plugin manager (TPM)
@@ -95,7 +94,7 @@ RUN ~/.tmux/plugins/tpm/bin/install_plugins
 COPY ./config/.zshrc /root/.zshrc
 
 # Copy helper entrypoint
-COPY ./scripts/denv /usr/local/bin/denv
+COPY ./scripts/denv_installer /usr/local/bin/denv
 COPY ./scripts/helper.sh /usr/local/bin/helper
 RUN chmod +x /usr/local/bin/denv /usr/local/bin/helper
 
