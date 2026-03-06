@@ -6,70 +6,44 @@ ENV ZSH_CUSTOM="${ZSH}/custom"
 ENV PATH="/root/.local/bin:/root/.fzf/bin:/root/.cargo/bin:$PATH"
 ENV TERM="xterm-256color"
 
+ARG TARGETARCH
+
+# System packages
 RUN apt-get update && apt-get install -y \
     zsh git curl wget htop vim docker.io bash-completion jq yq net-tools unzip bat tmux make \
     tzdata neofetch nodejs npm \
     && ln -s /usr/bin/batcat /usr/local/bin/bat \
     && ln -fs /usr/share/zoneinfo/Europe/Budapest /etc/localtime \
     && dpkg-reconfigure -f noninteractive tzdata \
-    && apt-get clean
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install oh-my-zsh
+# Shell setup (oh-my-zsh, plugins, fzf)
 RUN chsh -s $(which zsh) && \
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-
-# Install Zsh plugins
-RUN git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM}/plugins/zsh-autosuggestions && \
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended && \
+    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM}/plugins/zsh-autosuggestions && \
     git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting && \
-    git clone https://github.com/zdharma-continuum/fast-syntax-highlighting.git ${ZSH_CUSTOM}/plugins/fast-syntax-highlighting
+    git clone https://github.com/zdharma-continuum/fast-syntax-highlighting.git ${ZSH_CUSTOM}/plugins/fast-syntax-highlighting && \
+    git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf && \
+    ~/.fzf/install --key-bindings --completion --no-update-rc --no-bash --no-fish && \
+    rm -rf ${ZSH_CUSTOM}/plugins/*/.git ~/.fzf/.git
 
-# Install fzf with keybindings and completion
-RUN git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf && \
-    ~/.fzf/install --key-bindings --completion --no-update-rc --no-bash --no-fish
-
-# # Install exa with locked dependencies (for older rustc compatibility)
-# RUN cargo install exa --locked && \
-#     ln -s /root/.cargo/bin/exa /usr/local/bin/exa
-
-# Install zoxide and symlink globally
+# CLI tools (zoxide, uv, duckdb, lazydocker, k9s, claude code)
 RUN curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash && \
-    ln -s /root/.local/bin/zoxide /usr/local/bin/zoxide
-
-# Install UV
-ADD https://astral.sh/uv/install.sh /uv-installer.sh
-RUN chmod +x /uv-installer.sh && sh /uv-installer.sh && rm /uv-installer.sh
-
-# Install Glow
-# RUN mkdir -p /etc/apt/keyrings && \
-#     curl -fsSL https://repo.charm.sh/apt/gpg.key | gpg --dearmor -o /etc/apt/keyrings/charm.gpg && \
-#     echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | tee /etc/apt/sources.list.d/charm.list && \
-#     apt update && apt install glow
-
-# Install DuckDB
-ARG TARGETARCH
-WORKDIR /opt/duckdb
-
-RUN DUCKDB_ARCH=$([ "$TARGETARCH" = "arm64" ] && echo "aarch64" || echo "$TARGETARCH") && \
+    ln -s /root/.local/bin/zoxide /usr/local/bin/zoxide && \
+    curl -fsSL https://astral.sh/uv/install.sh | sh && \
+    DUCKDB_ARCH=$([ "$TARGETARCH" = "arm64" ] && echo "aarch64" || echo "$TARGETARCH") && \
+    cd /tmp && \
     wget https://github.com/duckdb/duckdb/releases/download/v1.2.2/duckdb_cli-linux-${DUCKDB_ARCH}.zip && \
     unzip duckdb_cli-linux-${DUCKDB_ARCH}.zip && \
-    mv duckdb /usr/local/bin/duckdb && \
-    chmod +x /usr/local/bin/duckdb && \
-    rm duckdb_cli-linux-${DUCKDB_ARCH}.zip
+    mv duckdb /usr/local/bin/duckdb && chmod +x /usr/local/bin/duckdb && \
+    rm duckdb_cli-linux-${DUCKDB_ARCH}.zip && \
+    curl https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh | bash && \
+    curl -fsSL "https://github.com/derailed/k9s/releases/latest/download/k9s_Linux_${TARGETARCH}.tar.gz" | tar xz -C /usr/local/bin k9s && \
+    npm install -g @anthropic-ai/claude-code
 
-# Install Claude Code
-RUN npm install -g @anthropic-ai/claude-code
-
-# Install lazydocker
-RUN curl https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh | bash
-
-# Install k9s
-RUN curl -fsSL "https://github.com/derailed/k9s/releases/latest/download/k9s_Linux_${TARGETARCH}.tar.gz" | tar xz -C /usr/local/bin k9s
-
-# Install tmux plugin manager (TPM)
-RUN git clone https://github.com/tmux-plugins/tpm /root/.tmux/plugins/tpm
-
-# Create a basic tmux.conf with resurrect and continuum
-RUN echo "\
+# Tmux setup (tpm, plugins, config)
+RUN git clone https://github.com/tmux-plugins/tpm /root/.tmux/plugins/tpm && \
+    echo "\
 set -g mouse on\n\
 setw -g mode-keys vi\n\
 bind -T copy-mode-vi WheelUpPane send-keys -X scroll-up\n\
@@ -86,14 +60,12 @@ set -g @continuum-restore 'on'\n\
 set -g @continuum-save-interval '1'\n\
 set -g @resurrect-strategy-nvim 'session'\n\
 run '~/.tmux/plugins/tpm/tpm'\n\
-" > /root/.tmux.conf
+" > /root/.tmux.conf && \
+    ~/.tmux/plugins/tpm/bin/install_plugins && \
+    rm -rf /root/.tmux/plugins/tpm/.git
 
-RUN ~/.tmux/plugins/tpm/bin/install_plugins
-
-# Copy custom zshrc
+# Config files (most likely to change — keep last for cache)
 COPY ./config/.zshrc /root/.zshrc
-
-# Copy helper entrypoint
 COPY ./scripts/denv_installer /usr/local/bin/denv
 COPY ./scripts/helper.sh /usr/local/bin/helper
 RUN chmod +x /usr/local/bin/denv /usr/local/bin/helper
