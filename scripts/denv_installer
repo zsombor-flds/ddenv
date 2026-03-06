@@ -151,15 +151,18 @@ start_or_attach() {
 
 case "${1:-}" in
   ""|start)
-    check_docker && setup_docker_cmd
+    check_docker
+    setup_docker_cmd
     start_or_attach "$IMAGE_REMOTE"
     ;;
   local)
-    check_docker && setup_docker_cmd
+    check_docker
+    setup_docker_cmd
     start_or_attach "$IMAGE_LOCAL"
     ;;
   stop)
-    check_docker && setup_docker_cmd
+    check_docker
+    setup_docker_cmd
     if container_running; then
       $DOCKER_CMD stop "$CONTAINER_NAME"
       echo "Stopped."
@@ -168,7 +171,8 @@ case "${1:-}" in
     fi
     ;;
   status)
-    check_docker && setup_docker_cmd
+    check_docker
+    setup_docker_cmd
     if container_running; then
       $DOCKER_CMD ps --filter "name=^${CONTAINER_NAME}$"
     else
