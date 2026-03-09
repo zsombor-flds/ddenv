@@ -67,8 +67,7 @@ run '~/.tmux/plugins/tpm/tpm'\n\
 # Config files (most likely to change — keep last for cache)
 COPY ./config/.zshrc /root/.zshrc
 COPY ./scripts/denv_installer /usr/local/bin/denv
-COPY ./scripts/helper.sh /usr/local/bin/helper
-RUN chmod +x /usr/local/bin/denv /usr/local/bin/helper
+RUN chmod +x /usr/local/bin/denv
 
 WORKDIR /workspace
 CMD ["zsh"]
