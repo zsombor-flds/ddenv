@@ -7,6 +7,7 @@ ENV PATH="/root/.local/bin:/root/.fzf/bin:/root/.cargo/bin:$PATH"
 ENV TERM="xterm-256color"
 
 ARG TARGETARCH
+ARG GH_VERSION=2.67.0
 
 # System packages
 RUN apt-get update && apt-get install -y \
@@ -39,6 +40,8 @@ RUN curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.s
     rm duckdb_cli-linux-${DUCKDB_ARCH}.zip && \
     curl https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh | bash && \
     curl -fsSL "https://github.com/derailed/k9s/releases/latest/download/k9s_Linux_${TARGETARCH}.tar.gz" | tar xz -C /usr/local/bin k9s && \
+    curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_${TARGETARCH}.tar.gz" | tar xz -C /tmp && \
+    mv /tmp/gh_${GH_VERSION}_linux_${TARGETARCH}/bin/gh /usr/local/bin/gh && rm -rf /tmp/gh_* && \
     npm install -g @anthropic-ai/claude-code
 
 # Tmux setup (tpm, plugins, config)
