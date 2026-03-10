@@ -2,14 +2,13 @@ build:
 	docker build -t denv .
 
 run:
-	./scripts/denv
+	./scripts/denv_installer
 
 run-local:
-	./scripts/denv local
+	./scripts/denv_installer local
 
 exec:
 	docker exec -it denv zsh
 
 install:
-	sudo cp ./scripts/denv /usr/local/bin/denv
-	sudo chmod +x /usr/local/bin/denv
+	./scripts/denv_installer install

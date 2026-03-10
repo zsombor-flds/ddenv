@@ -22,6 +22,7 @@ HISTFILE_PATH="$DENV_CONF/.docker_zsh_history"
 WORKSPACE="$HOME/workspace"
 GITCONFIG="$HOME/.gitconfig"
 SSH_DIR="$HOME/.ssh"
+GH_CONFIG="$HOME/.config/gh"
 TMUX_DIR="$DENV_CONF/tmux"
 
 usage() {
@@ -140,6 +141,7 @@ start_or_attach() {
       -v "$HISTFILE_PATH":/root/.zsh/history \
       -v "$GITCONFIG":/root/.gitconfig:ro \
       -v "$SSH_DIR":/root/.ssh:ro \
+      -v "$GH_CONFIG":/root/.config/gh \
       -v "$TMUX_DIR":/root/.tmux/resurrect \
       -v /var/run/docker.sock:/var/run/docker.sock \
       "$image" \

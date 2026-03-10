@@ -1,4 +1,7 @@
 # denv
+
+[![Build and Publish](https://github.com/zsombor-flds/denv/actions/workflows/build-and-publish.yml/badge.svg)](https://github.com/zsombor-flds/denv/actions/workflows/build-and-publish.yml)
+
 Dockerized development environment — consistent dev setup across any VM.
 
 ## Install
